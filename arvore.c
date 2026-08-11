@@ -1,155 +1,149 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <math.h>
-#include <time.h>
 
-// ALGORITMOS EM ÁRVORES BINÁRIAS E AVL - Desafio TreeMaster Quest
-// Utilize este código base para iniciar o seu desafio.
-// Descomente e implemente as funções de acordo com o nível escolhido.
-
-// ====================================================================
-// ESTRUTURAS DE DADOS
-// ====================================================================
-
-// Estrutura para os Níveis Novato e Aventureiro (BST Padrão)
-typedef struct No {
+// Estrutura base do documento, conforme especificado no desafio
+typedef struct Documento {
     int id;
     char titulo[100];
     char autor[50];
-    int ano;
-    struct No* esquerdo;
-    struct No* direito;
+    int ano_publicacao;
+} Documento;
+
+// Estrutura para um nó da árvore binária de busca
+typedef struct No {
+    Documento doc;
+    struct No* esquerdo; // Ponteiro para documentos com ID menor
+    struct No* direito;  // Ponteiro para documentos com ID maior
 } No;
 
-// Estrutura para o Nível Mestre (AVL)
-// Dica: Note a mudança do tipo do ID e a adição da variável 'altura'
-typedef struct NoAVL {
-    unsigned long int id;
-    char titulo[100];
-    char autor[50];
-    int ano;
-    int altura;
-    struct NoAVL* esquerdo;
-    struct NoAVL* direito;
-} NoAVL;
+// Criando um apelido para facilitar a leitura do código
+typedef No* Arvore;
 
-// ====================================================================
-// PROTÓTIPOS: NÍVEL NOVATO
-// ====================================================================
-
-// Função para criar um novo nó da árvore binária
-No* criar_no(int id, const char* titulo, const char* autor, int ano) {
-    // Dica: Use malloc para alocar o nó, copie as strings usando strcpy, 
-    // inicialize esquerdo e direito como NULL.
-    return NULL;
+// Função responsável por alocar memória e criar um novo nó folha
+No* criar_no(int id, char* titulo, char* autor, int ano) {
+    No* novo = (No*)malloc(sizeof(No));
+    
+    // Verificação simples de segurança para alocação de memória
+    if (novo == NULL) {
+        printf("Erro ao alocar memoria.\n");
+        exit(1);
+    }
+    
+    // Copiando os dados recebidos para dentro do nó
+    novo->doc.id = id;
+    strcpy(novo->doc.titulo, titulo);
+    strcpy(novo->doc.autor, autor);
+    novo->doc.ano_publicacao = ano;
+    
+    // Como é um nó novo (folha), não tem filhos ainda
+    novo->esquerdo = NULL;
+    novo->direito = NULL;
+    
+    return novo;
 }
 
-// Inserção na Árvore Binária de Busca (Recursiva ou Iterativa)
-No* inserir_bst(No* raiz, No* novo_no) {
-    // Dica: Compare o ID do novo_no com o ID da raiz para decidir se vai
-    // para a esquerda ou para a direita.
+// Função recursiva para inserir um documento na Árvore Binária de Busca
+Arvore inserir(Arvore raiz, int id, char* titulo, char* autor, int ano) {
+    // Se a posição estiver vazia, cria o nó e o insere aqui
+    if (raiz == NULL) {
+        return criar_no(id, titulo, autor, ano);
+    }
+    
+    // Regra da árvore de busca: IDs menores vão para a esquerda
+    if (id < raiz->doc.id) {
+        raiz->esquerdo = inserir(raiz->esquerdo, id, titulo, autor, ano);
+    } 
+    // IDs maiores vão para a direita
+    else if (id > raiz->doc.id) {
+        raiz->direito = inserir(raiz->direito, id, titulo, autor, ano);
+    }
+    
+    // Retorna a raiz atual para manter a árvore conectada
     return raiz;
 }
 
-// Percurso Em-Ordem (In-Order) para listar os documentos
-void exibir_em_ordem(No* raiz) {
-    // Dica: Visite o filho esquerdo, imprima a raiz, visite o filho direito.
+// Função recursiva para percorrer a árvore "em-ordem" (Esquerda -> Raiz -> Direita)
+// O ponteiro 'contador' é usado para numerar a ordem de exibição ("Documento 1", "Documento 2")
+void exibir_em_ordem(Arvore raiz, int* contador) {
+    if (raiz != NULL) {
+        // 1. Desce tudo para a esquerda (menores IDs primeiro)
+        exibir_em_ordem(raiz->esquerdo, contador);
+        
+        // 2. Processa o nó atual (imprime os dados)
+        printf("Documento %d:\n", *contador);
+        printf("ID: %d\n", raiz->doc.id);
+        printf("Título: %s\n", raiz->doc.titulo);
+        printf("Autor: %s\n", raiz->doc.autor);
+        printf("Ano de publicação: %d\n\n", raiz->doc.ano_publicacao);
+        
+        // Incrementa o contador para o próximo documento
+        (*contador)++;
+        
+        // 3. Desce tudo para a direita (maiores IDs)
+        exibir_em_ordem(raiz->direito, contador);
+    }
 }
-
-// ====================================================================
-// PROTÓTIPOS: NÍVEL AVENTUREIRO (DSW e Altura)
-// ====================================================================
-
-/*
-int calcular_altura(No* raiz) {
-    // Dica: A altura é 1 + o máximo entre a altura da subárvore esquerda e direita.
-    // Retorne -1 se a raiz for NULL.
-    return 0;
-}
-
-// Funções do algoritmo DSW
-int criar_vine(No** raiz) {
-    // Dica: Use rotações à direita para transformar a árvore em uma lista encadeada (vine).
-    return 0; // Retorna o número de nós
-}
-
-void balancear_vine(No** raiz, int n) {
-    // Dica: Use rotações à esquerda baseadas na quantidade ideal de nós perfeitos.
-}
-
-No* dsw_balancear(No* raiz) {
-    // Dica: Chame criar_vine e depois balancear_vine.
-    return raiz;
-}
-*/
-
-// ====================================================================
-// PROTÓTIPOS: NÍVEL MESTRE (Árvore AVL)
-// ====================================================================
-
-/*
-int altura_no_avl(NoAVL* no) {
-    // Dica: Retorne a altura salva no nó, ou -1 se for NULL.
-    return 0;
-}
-
-int fator_balanceamento(NoAVL* no) {
-    // Dica: Altura da subárvore esquerda menos a altura da subárvore direita.
-    return 0;
-}
-
-// Implemente as funções de rotação: rotacao_direita, rotacao_esquerda, etc.
-
-NoAVL* inserir_avl(NoAVL* raiz, NoAVL* novo_no) {
-    // Dica: Insira como na BST normal. Depois, atualize a altura do nó atual.
-    // Calcule o fator de balanceamento e aplique as rotações (LL, RR, LR, RL) se necessário.
-    return raiz;
-}
-*/
-
-// ====================================================================
-// FUNÇÃO PRINCIPAL
-// ====================================================================
 
 int main() {
-    printf("=== CODEFOREST SOLUTIONS - TREEMASTER QUEST ===\n\n");
-
-    // ---------------------------------------------------------
-    // ÁREA DO NÍVEL NOVATO
-    // ---------------------------------------------------------
-    /*
-    No* raiz = NULL;
-
-    // Criando os dois documentos base fornecidos no PDF
-    No* doc1 = criar_no(1001, "Introducao a programacao", "Joao Silva", 2020);
-    No* doc2 = criar_no(1002, "Estruturas de dados avancadas", "Maria Oliveira", 2023);
-
-    raiz = inserir_bst(raiz, doc1);
-    raiz = inserir_bst(raiz, doc2);
-
-    printf("=== Documentos cadastrados ===\n");
-    exibir_em_ordem(raiz);
-    */
-
-    // ---------------------------------------------------------
-    // ÁREA DO NÍVEL AVENTUREIRO
-    // ---------------------------------------------------------
-    /*
-    // Imprimir altura ANTES do DSW
-    // raiz = dsw_balancear(raiz);
-    // Imprimir altura DEPOIS do DSW
-    */
-
-    // ---------------------------------------------------------
-    // ÁREA DO NÍVEL MESTRE
-    // ---------------------------------------------------------
-    /*
-    // Inicializar uma raiz do tipo NoAVL
-    // Inserir documentos usando inserir_avl
-    // Capturar tempo, rotações e calcular resultados
-    // Exibir comparativo: "Tempo de execucao: AVL venceu (1)"
-    */
-
+    Arvore raiz = NULL; // Inicializa a base da biblioteca como vazia
+    
+    // Variáveis temporárias para ler as entradas do usuário
+    int id, ano;
+    char titulo[100], autor[50];
+    
+    printf("=== Bem-vindo ao Sistema CodeForest Solutions ===\n\n");
+    
+    // --- CADASTRO DO PRIMEIRO DOCUMENTO ---
+    printf("--- Cadastro do Primeiro Documento ---\n");
+    
+    printf("Digite o ID: ");
+    scanf("%d", &id);
+    
+    printf("Digite o Título: ");
+    // O espaço antes do % consome a quebra de linha ('\n') deixada pelo scanf anterior
+    // O [^\n] diz para o C ler toda a frase até o usuário apertar Enter
+    scanf(" %99[^\n]", titulo); 
+    
+    printf("Digite o Autor: ");
+    scanf(" %49[^\n]", autor);
+    
+    printf("Digite o Ano de publicação: ");
+    scanf("%d", &ano);
+    
+    // Insere o primeiro documento na árvore
+    raiz = inserir(raiz, id, titulo, autor, ano);
+    printf("Documento cadastrado com sucesso!\n\n");
+    
+    
+    // --- CADASTRO DO SEGUNDO DOCUMENTO ---
+    printf("--- Cadastro do Segundo Documento ---\n");
+    
+    printf("Digite o ID: ");
+    scanf("%d", &id);
+    
+    printf("Digite o Título: ");
+    scanf(" %99[^\n]", titulo); 
+    
+    printf("Digite o Autor: ");
+    scanf(" %49[^\n]", autor);
+    
+    printf("Digite o Ano de publicação: ");
+    scanf("%d", &ano);
+    
+    // Insere o segundo documento na árvore
+    raiz = inserir(raiz, id, titulo, autor, ano);
+    printf("Documento cadastrado com sucesso!\n\n");
+    
+    
+    // --- EXIBIÇÃO DOS DADOS ---
+    printf("=== Lista de Documentos Cadastrados ===\n\n");
+    
+    // Iniciamos o contador em 1 para a formatação pedida (Documento 1, Documento 2...)
+    int contador_exibicao = 1; 
+    
+    // Chamamos a função passando a raiz e o endereço do contador
+    exibir_em_ordem(raiz, &contador_exibicao);
+    
     return 0;
 }
